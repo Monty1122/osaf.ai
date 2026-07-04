@@ -194,7 +194,10 @@
     }
     textarea { min-height: 116px; resize: vertical; }
     .fineprint { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
-    .notice { display:none; margin-top: 16px; padding: 16px; border-radius: 18px; background: rgba(0,212,170,.12); color: #064b43; border: 1px solid rgba(0,212,170,.24); }
+    .notice { display:none; margin-top: 18px; padding: 22px 22px 22px 68px; border-radius: 22px; background: linear-gradient(135deg, rgba(0,212,170,.18), rgba(90,242,220,.10)); color: #043b35; border: 2px solid rgba(0,212,170,.55); box-shadow: 0 18px 42px rgba(0, 140, 115, .16); font-size: 17px; font-weight: 760; line-height: 1.45; position: relative; }
+    .notice::before { content: "✓"; position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: var(--teal); color: #031225; font-size: 22px; font-weight: 950; box-shadow: 0 10px 24px rgba(0,212,170,.35); }
+    .notice.error { background: linear-gradient(135deg, rgba(255,91,91,.14), rgba(255,255,255,.9)); color: #6b1111; border-color: rgba(255,91,91,.5); box-shadow: 0 18px 42px rgba(160, 30, 30, .12); }
+    .notice.error::before { content: "!"; background: #ff5b5b; color: #fff; }
     footer { background: #06111f; color: rgba(255,255,255,.72); padding: 42px 22px; }
     footer .wrap { display: flex; justify-content: space-between; gap: 24px; align-items: center; flex-wrap: wrap; }
     footer strong { color: #fff; }
@@ -369,12 +372,16 @@
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || 'Could not send application.');
-        notice.textContent = 'Thanks — your expression of interest has been sent. The OSAF Secretariat will follow up with the full application form.';
+        notice.classList.remove('error');
+        notice.innerHTML = '<strong>Expression of interest sent.</strong><br>The OSAF Secretariat will follow up with the full application form.';
         notice.style.display = 'block';
+        notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
         form.reset();
       } catch (error) {
+        notice.classList.add('error');
         notice.textContent = `${error.message} You can also email contact@osaf.ai directly.`;
         notice.style.display = 'block';
+        notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = 'Send expression of interest';
