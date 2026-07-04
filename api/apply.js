@@ -4,7 +4,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY || process.env.resend_api_key;
   const toEmail = process.env.OSAF_APPLICATION_TO || 'contact@osaf.ai';
   const fromEmail = process.env.OSAF_APPLICATION_FROM || 'OSAF Secretariat <applications@osaf.ai>';
 
