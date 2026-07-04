@@ -334,8 +334,8 @@
             <label>Organisation type<select name="type" required><option value="">Select one</option><option>AI infrastructure operator</option><option>Technology vendor</option><option>Enterprise user</option><option>Government or public-sector body</option><option>Research or academic institution</option><option>Investor or ecosystem partner</option><option>Other</option></select></label>
             <label>Why are you interested in OSAF?<textarea name="interest" placeholder="Tell us briefly about your organisation and sovereign AI priorities."></textarea></label>
             <button class="btn btn-primary" type="submit">Send expression of interest</button>
-            <p class="fineprint">This static form opens your email client with a prepared message to the OSAF Secretariat. No data is stored by this website.</p>
-            <div id="notice" class="notice">Thanks — your email client should open with a pre-filled expression of interest. Send that email and the Secretariat will follow up with the full application form.</div>
+            <p class="fineprint">This form securely sends your expression of interest to the OSAF Secretariat. The Secretariat will follow up with the full application pack.</p>
+            <div id="notice" class="notice">Thanks — your expression of interest has been sent. The OSAF Secretariat will follow up with the full application form.</div>
           </form>
         </div>
       </div>
@@ -352,13 +352,33 @@
   <script>
     const form = document.getElementById('interestForm');
     const notice = document.getElementById('notice');
-    form.addEventListener('submit', (event) => {
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const data = new FormData(form);
-      const subject = `OSAF membership expression of interest — ${data.get('organisation')}`;
-      const body = `Organisation: ${data.get('organisation')}\nName: ${data.get('name')}\nEmail: ${data.get('email')}\nCountry / region: ${data.get('region')}\nOrganisation type: ${data.get('type')}\n\nInterest in OSAF:\n${data.get('interest') || ''}\n\nPlease send the formal OSAF membership application pack.`;
-      window.location.href = `mailto:contact@osaf.ai?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      notice.style.display = 'block';
+      const data = Object.fromEntries(new FormData(form).entries());
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending...';
+      notice.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Could not send application.');
+        notice.textContent = 'Thanks — your expression of interest has been sent. The OSAF Secretariat will follow up with the full application form.';
+        notice.style.display = 'block';
+        form.reset();
+      } catch (error) {
+        notice.textContent = `${error.message} You can also email contact@osaf.ai directly.`;
+        notice.style.display = 'block';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Send expression of interest';
+      }
     });
   </script>
 </body>
